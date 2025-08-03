@@ -18,11 +18,10 @@ export default async function handler(req, res) {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-      res.status(204).end();
+      return res.status(204).end();
     } else {
-      res.status(403).json({ error: "CORS restricted to Hugging Face only." });
+      return res.status(403).json({ error: "CORS restricted to Hugging Face only." });
     }
-    return;
   }
 
   if (!isHuggingFace) {
@@ -41,7 +40,10 @@ export default async function handler(req, res) {
       body = Buffer.concat(buffers);
     }
 
-    const { host, connection, ...customHeaders } = req.headers;
+    const customHeaders = {
+      "Authorization": req.headers["authorization"] || "",
+      "Content-Type": req.headers["content-type"] || "application/json",
+    };
 
     const proxyRes = await fetch(targetUrl, {
       method,
